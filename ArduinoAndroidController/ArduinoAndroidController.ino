@@ -2,12 +2,14 @@
 #include <WiFiNINA.h>
 
 
-char ssid[] = "Ardino";        // your network SSID (name)
+char ssid[] = "Arduino";        // your network SSID (name)
 char pass[] = "binozoworks";    // your network password (use for WPA, or use as key for WEP)
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
 WiFiServer server(8140);
 
 void setup() {
+  pinMode(5, OUTPUT);
+  digitalWrite(5, HIGH);
   Serial.begin(9600);
   while (!Serial); //Warte bis der Serial Port verbunden ist
 
@@ -66,6 +68,7 @@ void loop() {
     String currentLine = "";                // make a String to hold incoming data from the client
     while (client.connected()) {            // loop while the client's connected
       if (client.available()) {             // if there's bytes to read from the client,
+        
         char c = client.read();             // read a byte, then
         Serial.write(c);                    // print it out the serial monitor
         if (c == '\n') {                    // if the byte is a newline character
@@ -102,10 +105,10 @@ void loop() {
 
         // Check to see if the client request was "GET /H" or "GET /L":
         if (currentLine.endsWith("GET /H")) {
-          digitalWrite(led, HIGH);               // GET /H turns the LED on
+          //digitalWrite(led, HIGH);               // GET /H turns the LED on
         }
         if (currentLine.endsWith("GET /L")) {
-          digitalWrite(led, LOW);                // GET /L turns the LED off
+          //digitalWrite(led, LOW);                // GET /L turns the LED off
         }
       }
     }
