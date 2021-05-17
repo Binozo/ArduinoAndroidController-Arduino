@@ -5,14 +5,14 @@
 char ssid[] = "Arduino";        // your network SSID (name)
 char pass[] = "binozoworks";    // your network password (use for WPA, or use as key for WEP)
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
-WiFiServer server(8140);
+WiFiServer server(80);
 
 void setup() {
-  pinMode(5, OUTPUT);
-  digitalWrite(5, HIGH);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
   Serial.begin(9600);
-  while (!Serial); //Warte bis der Serial Port verbunden ist
-
+  while (!Serial && millis() < 5000); //Warte bis der Serial Port verbunden ist
+  digitalWrite(LED_BUILTIN, LOW);
   Serial.println("Boote TCP System...");
 
   // check for the WiFi module:
@@ -68,10 +68,27 @@ void loop() {
     String currentLine = "";                // make a String to hold incoming data from the client
     while (client.connected()) {            // loop while the client's connected
       if (client.available()) {             // if there's bytes to read from the client,
-        
-        char c = client.read();             // read a byte, then
-        Serial.write(c);                    // print it out the serial monitor
-        if (c == '\n') {                    // if the byte is a newline character
+        String text = client.readString();
+        //char c = client.read();             // read a byte, then
+        //Serial.write(c);                    // print it out the serial monitor
+        //currentLine += c;
+        if(text.equals("led an")){
+          Serial.write("LED an\n");
+          client.print(1);
+          digitalWrite(LED_BUILTIN, HIGH);
+        }
+        if(text.equals("led aus")){
+          Serial.write("LED aus\n");
+          client.print(1);
+          digitalWrite(LED_BUILTIN, LOW);
+        }
+        if(text.equals("Client bestaetigt.")){
+          Serial.write("CLient verbunden\n");
+          client.print(1);
+          
+        }
+        client.println('Ok');
+        /*if (c == '\n') {                    // if the byte is a newline character
 
           // if the current line is blank, you got two newline characters in a row.
           // that's the end of the client HTTP request, so send a response:
@@ -101,7 +118,7 @@ void loop() {
         }
         else if (c != '\r') {    // if you got anything else but a carriage return character,
           currentLine += c;      // add it to the end of the currentLine
-        }
+        }*/
 
         // Check to see if the client request was "GET /H" or "GET /L":
         if (currentLine.endsWith("GET /H")) {
@@ -114,7 +131,7 @@ void loop() {
     }
     // close the connection:
     client.stop();
-    Serial.println("client disconnected");
+    Serial.println("\nclient disconnected");
   }
 }
 
