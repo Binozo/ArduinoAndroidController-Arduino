@@ -8,6 +8,9 @@ int status = WL_IDLE_STATUS;     // the Wifi radio's status
 WiFiServer server(80);
 
 void setup() {
+  pinMode(5, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(3, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
   Serial.begin(9600);
@@ -74,20 +77,33 @@ void loop() {
         //currentLine += c;
         if(text.equals("led an")){
           Serial.write("LED an\n");
-          client.print(1);
+          client.println("\nOk");
           digitalWrite(LED_BUILTIN, HIGH);
         }
         if(text.equals("led aus")){
           Serial.write("LED aus\n");
-          client.print(1);
+          client.println("\nOk");
           digitalWrite(LED_BUILTIN, LOW);
         }
         if(text.equals("Client bestaetigt.")){
           Serial.write("CLient verbunden\n");
-          client.print(1);
-          
+          client.println("\n Moin moin");
         }
-        client.println('Ok');
+        if(text.startsWith("LED ")){
+          
+          String farbeR = getValue(text, ' ', 1);
+          String farbeG = getValue(text, ' ', 2);
+          String farbeB = getValue(text, ' ', 3);
+
+          analogWrite(5, farbeR.toInt());
+          analogWrite(4, farbeG.toInt());
+          analogWrite(3, farbeB.toInt());
+
+          client.println("Ok");
+
+        }
+
+        //client.println("Ok");
         /*if (c == '\n') {                    // if the byte is a newline character
 
           // if the current line is blank, you got two newline characters in a row.
@@ -150,4 +166,21 @@ void printWiFiStatus() {
   Serial.print("To see this page in action, open a browser to http://");
   Serial.println(ip);
 
+}
+
+String getValue(String data, char separator, int index)
+{
+  int found = 0;
+  int strIndex[] = {0, -1};
+  int maxIndex = data.length()-1;
+
+  for(int i=0; i<=maxIndex && found<=index; i++){
+    if(data.charAt(i)==separator || i==maxIndex){
+        found++;
+        strIndex[0] = strIndex[1]+1;
+        strIndex[1] = (i == maxIndex) ? i+1 : i;
+    }
+  }
+
+  return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
